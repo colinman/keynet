@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+///////////////
+// Map Keys and Values
+///////////////
+
+enum MappingKeyType {
+    DOMAIN = 1
+    EMAIL = 2;
+    ALIAS = 3;
+    URL = 4;
+}
+
+message Email {
+    string address = 1;
+    string domain = 2;
+}
+message Alias {
+    oneof alias {
+        string domain = 1;
+        Email email = 2;
+    }
+}
+message Url {
+    string path = 1;
+    string domain = 2;
+}
+message MappingKey {
+    oneof key {
+        string domain = 1;
+        Email email = 2;
+        Alias alias = 3;
+        string url = 4;
+    }
+}
+
+enum MappingValueType {
+    PUBLIC_KEY = 1
+    INFO = 2;
+    SHA256HASH = 3;
+    URL_COMMITMENT = 4;
+    POLICY = 5;
+}
+message MappingValue {
+    oneof value {
+        string public_key = 1;
+        Info info = 2;
+        string sha256hash = 3;
+        UrlCommitment commitment = 4;
+        string policy = 5;
+    }
+
+    message Info {
+        string name = 1;
+        string address = 2;
+    }
+    message UrlCommitment {
+        string commitment_url = 1;
+        string expiry_time = 2;
+    }
+}
+

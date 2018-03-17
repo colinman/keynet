@@ -1,0 +1,68 @@
+/////////////////
+// Keynet Identity Map (default)
+/////////////////
+
+
+
+/////////////////
+// Binary Hashes
+/////////////////
+
+// Create the mapping
+message CreateMappingRequest {
+    mapping = Mapping {
+        id = "binary",
+        create_validator = [ Validator {
+            operation = [
+                // bootstrap with CAs
+                OpCASignature {},
+                // require signature by owner to update
+                OpOwnerSignature {}
+            ]
+        }],
+        update_validator = [ Validator {
+            operation = [
+                // require keynet signature for updates
+                OpOwnerSignature {}
+            ]
+        }]
+        key_type = URL
+        value_type = SHA256HASH
+    }
+}
+
+// Create an entry
+message UpdateRequest {
+    update = EntryUpdate {
+        mapping_id = "binary",       
+        key = Url {
+            path = "/download/file.zip"
+            domain = "stanford.edu"
+        }
+        value = "{hash value here}"
+    },
+    signature = ["{signature of EntryUpdate}"]
+}
+
+// Update entry to require n of m signatures 
+// for future updates
+message UpdateRequest {
+    update = EntryUpdate {
+        mapping_id = "binary",       
+        key = Url {
+            path = "/download/file.zip"
+            domain = "stanford.edu"
+        }
+        value = "{hash value here}"
+        update_validator = [ Validator {
+            operation = [
+                n_of_m_sig = OpNOfMSignatures {
+                    alias = ["eff.org", "mozilla.org", "ietf.org"],
+                    required_number = 2
+                    
+                }
+            ]
+        }]
+    },
+    signature = ["{sig1}", "sig2", "sig3"]
+}

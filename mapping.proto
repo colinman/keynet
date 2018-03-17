@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+import "types.proto"
+import "ops.proto"
+
+///////////////
+// Mappings
+///////////////
+
+// Represents a new mapping. Entries can be added and updated in the
+// mapping via the `Mapping Function Calls` specified below.
+message Mapping {
+    string id = 1;                             // client-supplied. duplicates are rejected.
+    repeated Validator create_validator = 2;   // all validators need to pass for create to be valid
+    repeated Validator update_validator = 3;   // all validators need to pass for transition to be valid
+    types.MappingKeyType key_type = 4;         // key type of entries
+    types.MappingValueType value_type = 5;     // value type of entries
+}
+
+message Validator {
+    repeated ops.Operation operation = 1;     // validation passes if one of the operations return true
+}
+
+///////////////
+// Mapping Management Calls
+///////////////
+
+// Create a new mapping
+message CreateMappingRequest {
+    Mapping mapping = 1;
+}
+
+message CreateMappingResponse {}
+rpc CreateMapping (CreateMappingRequest) returns (CreateMappingResponse);
+
+// Retrieve a mapping by its ID
+message GetMappingRequest {
+    string id = 1;
+}
+
+message GetMappingResponse {
+    Mapping mapping = 1;
+}
+rpc GetMapping (GetMappingRequest) returns (GetMappingResponse);
+
+///////////////
+// Mapping Function Calls
+///////////////
+
+// Representation of a signature
+message Signature {    
+    oneof signature {
+        KeynetSignature keynet = 1;
+        CASignature ca = 2;
+    }
+
+    message KeynetSignature {
+        types.Alias alias = 1;    
+        string signature = 2;
+    }
+
+    message CASignature {
+        string certificate = 1;    
+        string signature = 2;
+    }
+}
+
+// An entry update can be creation or update or deletion of an entry in
+// a given mapping. Signatures are computed over this payload.
+message EntryUpdate {
+    string mapping_id = 1;      // ID of the Mapping in which to create/update/delete an entry
+    types.MappingKey key = 2;
+    types.Mappingvalue value = 3;
+
+    // Validators that override the default Mapping validators on the next update. If update_validator
+    // is specified, then the following EntryUpdates must pass the specified validators to succeed. The default
+    // Mapping validators are not evaluated.
+    //
+    // If a new list of Validators is specified again in the next update, it will override previous specified
+    // update_validator.
+    repeated Validator update_validator = 4;
+}
+
+// Create or update an existing entry. Validators on the Mapping and on the last entry must pass in order 
+// for the update to succeed.
+message UpdateRequest {
+    EntryUpdate update = 1;
+    repeated Signature signature = 2;
+}
+message UpdateResponse {}
+rpc Update (UpdateRequest) returns (UpdateResponse);
+
+// Retrieve an existing entry from a mapping given a key.
+message GetRequest {
+    string mapping_id = 1;
+    types.MappingKey key = 2;
+}
+
+message GetResponse {
+    string mapping_id = 1;
+    types.MappingValue value = 2;
+}
+rpc Get (GetRequest) returns (GetResponse);
