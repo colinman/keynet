@@ -60,13 +60,18 @@ These operations help define whether a Create or Update transition is valid for 
 
 ```
     OpIdentity:         
-        Enforces that update signature is signed by "value" in k-v store.
+        Create: Enforces that the creation is signed, by a public key with a valid
+                chain to a root CA (from ca-certificates package).
+                TODO: this "Create" part is hand-wavy. Should we even mention?
+        Update: Enforces that update signature is signed by the previous "value" in
+                k-v store.
     OpStatement:        
         Enforces that create/update signature is signed by "key" in k-v store.
     OpNOfMIdentities:   
         Enforces that the update signature is a valid threshold sig for N of
         the M identities specified by the transaction. (Create operations
         define which M public keys are valid for the threshold sig)
+        TODO: This part is also hand-wavy. Where does the M parameter go?
 ```
 
 ### Network RPCs
