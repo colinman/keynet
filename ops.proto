@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+import "types.proto"
+
+///////////////
+// Rules
+///////////////
+
+// Before rules are evaluated, an "owner" of the entry is
+// an Alias computed from the MappingKeyType. The
+// following is a table of key types and their
+// corresponding owners.
+// 
+// Email -> `domain` field is the owner
+// Url -> `domain` field is the owner
+// Alias -> the alias is the owner
+
+// Returns true if one of the CA-based signatures
+// provided in the EntryUpdate matches the owner
+// of the entry.
+message OpOwnerCASignature {}
+
+// Returns true if one of the Keynet-based signatures
+// provided in the EntryUpdate matches the owner
+// of the entry.
+message OpOwnerSignature {}
+
+// Returns true if one of the Keynet-based signatures
+// provided in the EntryUpdate matches the alias
+// specified in the operation.
+message OpThirdPartySignature {
+    type.Alias alias = 1;
+}
+
+// Returns true if n of m signatures match the aliases
+// specified in the operation.
+message OpNOfMSignatures {
+    repeated types.Alias alias = 1;
+    int required_number = 2;
+}
+
+// Returns true if the current epoch is greater than the
+// epoch specified in the operation.
+message OpLockoutEpoch {
+    int epoch = 1;
+}
+
+message Operation {
+    op oneof {
+        OpOwnerCASignature ca_sig = 1;
+        OpOwnerSignature owner_sig = 2;
+        OpThirdPartySignature third_party_sig = 3;
+        OpNOfMSignatures n_of_m_sig = 3;
+        OpLockoutEpoch lockout_epoch = 4;
+    }
+}
