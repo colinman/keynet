@@ -30,8 +30,8 @@ Suppose I want the network to perform consensus over my binary hashes! I would s
 
 ```
 CreateMapping {
-    create_transition_rule: ["OpOwnerSignature"],
-    update_transition_rule: ["OpOwnerSignature"],
+    create_validator: ["OpOwnerSignature"],
+    update_validator: ["OpOwnerSignature"],
     key_type: "PublicKey",
     value_type: "SHA256Hash",
 }
