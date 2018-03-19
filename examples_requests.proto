@@ -6,16 +6,24 @@
 message CreateMappingRequest {
     mapping = Mapping {
         id = "keynet",
-        create_validator = [ Validator {
+        create_validator = [ "bootstrap_validator": Validator {
             operation = [
                 // bootstrap with CAs
-                OpCASignature {},
+                OpCASignature {
+                    enabled = true
+                },
             ]
         }],
-        update_validator = [ Validator {
+        update_validator = [ "identity_validator": Validator {
             operation = [
                 // require keynet signature for updates
-                OpOwnerSignature {}
+                "owner": OpOwnerSignature {
+                    enabled = true
+                }
+                
+                // allow n of m signatures, but defaults to always false until 
+                // modified by entry update
+                "multisig": OpNOfMSignatures {}
             ]
         }]
         key_type = ALIAS
@@ -50,9 +58,15 @@ message UpdateRequest {
             }
         }
         value = "{new public key here}"
-        update_validator = [ Validator {
+        update_validator = [ "identity_validator": Validator {
             operation = [
-                n_of_m_sig = OpNOfMSignatures {
+                // disable signature update
+                "owner": OpOwnerSignature {
+                    enabled = false                    
+                }
+
+                // allow n of m update
+                "multisig": OpNOfMSignatures {
                     alias = ["eff.org", "mozilla.org", "ietf.org"],
                     required_number = 2
                     
@@ -71,18 +85,27 @@ message UpdateRequest {
 message CreateMappingRequest {
     mapping = Mapping {
         id = "binary",
-        create_validator = [ Validator {
-            operation = [
-                // require signature by owner to update
-                OpOwnerSignature {}
-            ]
-        }],
-        update_validator = [ Validator {
+        create_validator = [ "bootstrap_validator": Validator {
             operation = [
                 // require keynet signature for updates
-                OpOwnerSignature {}
+                "owner": OpOwnerSignature {
+                    enabled = true
+                }
+            ]
+        }],
+        update_validator = [ "identity_validator": Validator {
+            operation = [
+                // require keynet signature for updates
+                "owner": OpOwnerSignature {
+                    enabled = true
+                }
+                
+                // allow n of m signatures, but defaults to always false until 
+                // modified by entry update
+                "multisig": OpNOfMSignatures {}
             ]
         }]
+
         key_type = URL
         value_type = SHA256HASH
     }
@@ -111,9 +134,14 @@ message UpdateRequest {
             domain = "stanford.edu"
         }
         value = "{hash value here}"
-        update_validator = [ Validator {
+        update_validator = [ "identity_validator": Validator {
             operation = [
-                n_of_m_sig = OpNOfMSignatures {
+                // Note that the "owner" operation is omitted, so it is not updated. The end result
+                // of the update is that either n of m signatures or identity signature will be allowed
+                // to update the entry.
+
+                // allow n of m update
+                "multisig": OpNOfMSignatures {
                     alias = ["eff.org", "mozilla.org", "ietf.org"],
                     required_number = 2
                     
