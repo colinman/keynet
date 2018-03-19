@@ -45,6 +45,13 @@ message OpLockoutEpoch {
     int epoch = 1;
 }
 
+// Returns true if the mapping entry is already present
+// in a mapping version that has been whitelisted by
+// the current mapping.
+message OpPreviousVersion {
+    repeated string allowed_version_ids = 1;
+}
+
 message Operation {
     op oneof {
         OpOwnerCASignature ca_sig = 1;

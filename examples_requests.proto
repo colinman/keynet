@@ -5,11 +5,15 @@
 // Create the mapping
 message CreateMappingRequest {
     mapping = Mapping {
-        id = "keynet",
+        id = "keynet_v1.1",
         create_validator = [ Validator {
             operation = [
                 // bootstrap with CAs
                 OpCASignature {},
+                // bootstrap with previous version
+                OpPreviousVersion {
+                    allowed_version_ids = ["keynet_v1.0"] 
+                },
             ]
         }],
         update_validator = [ Validator {
@@ -26,7 +30,7 @@ message CreateMappingRequest {
 // Create an entry
 message UpdateRequest {
     update = EntryUpdate {
-        mapping_id = "keynet",       
+        mapping_id = "keynet_v1.0",       
         key = Alias {
             Email {
                 address = "colinman@stanford.edu"
@@ -38,11 +42,27 @@ message UpdateRequest {
     signature = ["{stanford.edu CA PKI-based signature to prove ownership}"]
 }
 
+// Create an entry from an existing entry in a previous mapping
+// version (1.0 -> 1.1)
+message UpdateRequest {
+    update = EntryUpdate {
+        mapping_id = "keynet_v1.1",       
+        key = Alias {
+            Email {
+                address = "colinman@stanford.edu"
+                domain = "stanford.edu"
+            }
+        }
+        value = "{public key here}"
+    },
+    signature = [] // nothing, the entry is already signed and present in keynet_v1.0
+} 
+
 // Update entry to require n of m signatures 
 // for future updates
 message UpdateRequest {
     update = EntryUpdate {
-        mapping_id = "keynet",       
+        mapping_id = "keynet_v1.1",       
         key = Alias {
             Email {
                 address = "colinman@stanford.edu"
