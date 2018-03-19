@@ -10,15 +10,25 @@ import "ops.proto"
 // Represents a new mapping. Entries can be added and updated in the
 // mapping via the `Mapping Function Calls` specified below.
 message Mapping {
-    string id = 1;                             // client-supplied. duplicates are rejected.
-    repeated Validator create_validator = 2;   // all validators need to pass for create to be valid
-    repeated Validator update_validator = 3;   // all validators need to pass for transition to be valid
-    types.MappingKeyType key_type = 4;         // key type of entries
-    types.MappingValueType value_type = 5;     // value type of entries
+    string id = 1;                             // Client-supplied. Duplicates are rejected.
+
+    // Map of name to validator. The name must be unique within the mapping.
+    // The name of the operation is used to override mapping operations on updates if specified
+    // See `EntryUpdate` for more details on updating operations.
+    map<string, Validator> create_validator = 2;   // All validators need to pass for create to be valid
+    map<string, Validator> update_validator = 3;   // All validators need to pass for transition to be valid
+
+    types.MappingKeyType key_type = 4;         // Key type of entries
+    types.MappingValueType value_type = 5;     // Value type of entries
 }
 
 message Validator {
-    repeated ops.Operation operation = 1;     // validation passes if one of the operations return true
+    // Map of name to operation. the name must be unique within the validator.
+    // The name of the operation is used to override mapping operations on updates if specified
+    // See `EntryUpdate` for more details on updating operations.
+    // 
+    // Validation passes if one of the operations return true.
+    map<string, ops.Operation> operation = 1;     
 }
 
 ///////////////
@@ -78,7 +88,16 @@ message EntryUpdate {
     //
     // If a new list of Validators is specified again in the next update, it will override previous specified
     // update_validator.
-    repeated Validator update_validator = 4;
+    // 
+    // To ensure that the security of the mapping is not weakened, there is an additional restriction that 
+    // only validators defined in the original `Mapping` can be overridden. New validators cannot be introduced.
+    // The name of the validator (key of the map) must match the key of the `update_validator` map in the
+    // `Mapping` definition. Wthin the Validator, new Operations cannot be introduced, only updated. The type
+    // of the updated Operation must match the original type.
+    // 
+    // Not all operations need to be specified in the map. Keynet keeps track of the state of the validators.
+    // 
+    map<string, Validator> update_validator = 4; // optional
 }
 
 // Create or update an existing entry. Validators on the Mapping and on the last entry must pass in order 

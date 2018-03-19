@@ -18,29 +18,43 @@ import "types.proto"
 // Returns true if one of the CA-based signatures
 // provided in the EntryUpdate matches the owner
 // of the entry.
-message OpOwnerCASignature {}
+// 
+// Always returns false it `enabled` is not set.
+message OpOwnerCASignature {
+    bool enabled = 1;    
+}
 
 // Returns true if one of the Keynet-based signatures
 // provided in the EntryUpdate matches the owner
 // of the entry.
-message OpOwnerSignature {}
+// 
+// Always returns false it `enabled` is not set.
+message OpOwnerSignature {
+    bool enabled = 1;
+}
 
 // Returns true if one of the Keynet-based signatures
-// provided in the EntryUpdate matches the alias
+// provided in the EntryUpdate matches the an alias in the list
 // specified in the operation.
+// 
+// Always returns false if the alias field is not defined
 message OpThirdPartySignature {
-    type.Alias alias = 1;
+    repeated type.Alias alias = 1;
 }
 
 // Returns true if n of m signatures match the aliases
 // specified in the operation.
+// 
+// Always returns false if either of the fields are not defined.
 message OpNOfMSignatures {
-    repeated types.Alias alias = 1;
-    int required_number = 2;
+    repeated types.Alias alias = 1; // optional
+    int required_number = 2;        // optional
 }
 
 // Returns true if the current epoch is greater than the
 // epoch specified in the operation.
+// 
+// Always returns false if the epoch field is not defined.
 message OpLockoutEpoch {
     int epoch = 1;
 }
